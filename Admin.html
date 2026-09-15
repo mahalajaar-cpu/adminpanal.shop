@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+    <title>ABHISHEK PANEL ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg-color: #0b0a12;
+            --card-bg: rgba(20, 18, 31, 0.7);
+            --card-border: rgba(0, 240, 255, 0.1);
+            --neon-pink: #ff007f;
+            --neon-purple: #bc13fe;
+            --neon-cyan: #00f0ff;
+            --text-main: #ffffff;
+            --text-muted: #8a8f9e;
+            --success: #00ff66;
+            --speed: #ff2a5f;
+            --warning: #ffaa00;
+            --brand-red: #e61a1a;
+            --input-bg: #1c1a27;
+            --error: #ff2a5f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+        
+        .hidden { display: none !important; }
+
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #06050a; z-index: 10005; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            transition: opacity 0.2s ease-out;
+        }
+        .speed-spinner-box {
+            position: relative; width: 80px; height: 80px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .spinner-outer { 
+            width: 100%; height: 100%; 
+            border: 4px solid rgba(0, 240, 255, 0.05); 
+            border-top-color: var(--neon-cyan); 
+            border-bottom-color: var(--neon-purple);
+            border-radius: 50%; 
+            animation: super-spin 0.6s linear infinite; 
+        }
+        .spinner-inner {
+            position: absolute; width: 50px; height: 50px;
+            border: 3px solid rgba(255, 0, 127, 0.05);
+            border-left-color: var(--neon-pink);
+            border-radius: 50%;
+            animation: super-spin-reverse 0.4s linear infinite;
+        }
+        .loader-text {
+            margin-top: 20px; font-size: 13px; font-weight: 700;
+            color: #ffffff; letter-spacing: 2px; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+            animation: pulse-text 1s ease-in-out infinite alternate;
+        }
+        @keyframes super-spin { 100% { transform: rotate(360deg); } }
+        @keyframes super-spin-reverse { 100% { transform: rotate(-360deg); } }
+        @keyframes pulse-text { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .login-wrapper {
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; width: 100vw; background: #07060b; padding: 20px;
+        }
+        .login-card {
+            background: #111019; width: 100%; max-width: 420px;
+            border-radius: 28px; padding: 35px 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.03); text-align: center;
+        }
+        .login-icon-circle {
+            width: 85px; height: 85px; background: var(--brand-red); border-radius: 50%;
+            display: inline-flex; justify-content: center; align-items: center;
+            font-size: 38px; color: white; box-shadow: 0 0 25px rgba(230,26,26,0.4);
+            margin-bottom: 25px; transform: rotate(-45deg);
+        }
+        .login-card h1 { font-size: 28px; font-weight: 700; color: white; margin-bottom: 8px; }
+        .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        
+        .auth-group { text-align: left; margin-bottom: 20px; }
+        .auth-group label { display: block; font-size: 13px; color: #b3b3b3; margin-bottom: 8px; font-weight: 500; }
+        .auth-group label i { margin-right: 6px; color: var(--brand-red); }
+        
+        .auth-input-container { position: relative; width: 100%; }
+        .auth-input-container i.field-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--brand-red); font-size: 16px; }
+        .auth-input-container i.toggle-eye { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; }
+        
+        .auth-input {
+            width: 100%; height: 54px; background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 14px;
+            color: white; padding: 0 45px; font-size: 14px; outline: none; transition: 0.3s;
+        }
+        .auth-input.focused-red { border-color: var(--brand-red); box-shadow: 0 0 10px rgba(230,26,26,0.1); }
+        
+        .btn-signin {
+            width: 100%; height: 54px; background: linear-gradient(90deg, #cc1414, #ff2a2a);
+            color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
+            margin-top: 25px; box-shadow: 0 6px 20px rgba(230,26,26,0.3); transition: 0.3s;
+        }
+        
+        .support-box { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.03); }
+        .support-title { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .support-title i { color: var(--brand-red); }
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .social-btn { height: 42px; border-radius: 20px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; text-decoration: none; color: white; }
+        .social-btn.wa { background: #128c7e; }
+        .social-btn.tg { background: #0088cc; }
+
+        .glass {
+            background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border); border-radius: 16px; padding: 25px; margin-bottom: 25px;
+        }
+
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); background: #0b0a12;
+        }
+        .nav-left { display: flex; align-items: center; gap: 15px; }
+        .menu-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .logo { font-weight: 800; font-size: 20px; letter-spacing: 1px; }
+        .logo span { color: var(--neon-cyan); }
+
+        .sidebar {
+            position: fixed; top: 0; left: -310px; width: 310px; height: 100%;
+            background: #110f1a; z-index: 1001; transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column; padding: 30px 20px; box-shadow: 10px 0 40px rgba(0,0,0,0.6);
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-header-box { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; position: relative; }
+        .sidebar-logo-icon-bg { width: 46px; height: 46px; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; }
+        .sidebar-header-text { display: flex; flex-direction: column; }
+        .sidebar-header-title { font-weight: 700; font-size: 17px; color: #ffffff; }
+        .sidebar-header-subtitle { font-size: 10px; font-weight: 700; color: var(--neon-cyan); text-transform: uppercase; margin-top: 2px; }
+        .sidebar-close { position: absolute; right: 0; top: 12px; background: none; border: none; color: #5f5a75; font-size: 18px; cursor: pointer; }
+
+        .sidebar-menu-cat { font-size: 10px; font-weight: 700; color: #575270; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; margin-left: 8px; }
+        .sidebar-menu-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .sidebar-item { display: flex; align-items: center; gap: 16px; padding: 14px 18px; color: #928daf; font-size: 14px; font-weight: 500; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .sidebar-item i { font-size: 16px; width: 20px; text-align: center; }
+        
+        .sidebar-item.active-menu { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); color: #ffffff; font-weight: 600; }
+        .sidebar-item:hover:not(.active-menu):not(.menu-logout-btn) { background: rgba(255,255,255,0.03); color: #ffffff; }
+        
+        .sidebar-item.menu-logout-btn {
+            margin-top: 15px; background: rgba(255, 42, 95, 0.1);
+            border: 1px solid rgba(255, 42, 95, 0.2); color: var(--error); font-weight: 600;
+        }
+        .sidebar-item.menu-logout-btn i { color: var(--error); }
+        .sidebar-item.menu-logout-btn:hover { background: var(--error); color: white; }
+        .sidebar-item.menu-logout-btn:hover i { color: white; }
+
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; backdrop-filter: blur(5px); }
+        .sidebar-overlay.active { display: block; }
+
+        .container { padding: 95px 20px 30px 20px; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .stat-card { 
+            background: #14121f; border-left: 4px solid var(--neon-cyan); border-radius: 12px; 
+            padding: 25px 20px; display: flex; flex-direction: column; gap: 5px;
+            cursor: pointer; transition: all 0.2s ease; user-select: none;
+        }
+        .stat-card.purple { border-left-color: var(--neon-purple); }
+        .stat-card.pink { border-left-color: var(--neon-pink); }
+        
+        .stat-card:active {
+            transform: scale(0.98);
+            background: rgba(0, 240, 255, 0.12) !important;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+
+        .stat-num { font-size: 36px; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; }
+
+        h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        h2 i { color: var(--neon-cyan); }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+        .input-group input, .custom-select { width: 100%; padding: 0 16px; height: 45px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: white; outline: none; font-size: 14px; }
+
+        .btn { width: 100%; height: 45px; border-radius: 10px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px; }
+        .btn-cyan { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); color: white; }
+        .btn-pink { background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple)); color: white; }
+
+        .table-wrapper { overflow-x: auto; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 950px; }
+        th { padding: 12px; color: var(--neon-cyan); text-transform: uppercase; font-size: 11px; border-bottom: 2px solid rgba(255,255,255,0.05); }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); vertical-align: middle; }
+        
+        .table-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 10px; border-radius: 6px; outline: none; width: 100%; }
+        .ro-text { color: var(--text-muted); font-weight: 500; font-size: 13px; }
+        .badge-bal { color: var(--success); font-weight: 700; font-size: 14px; display: block; }
+
+        .balance-control-box { display: flex; gap: 4px; align-items: center; max-width: 150px; margin-top: 4px; }
+        .balance-control-box input { height: 32px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #00ff66; text-align: center; width: 100%; }
+
+        .action-btn { border: none; padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+        .action-btn.add { background: var(--success); color: black; }
+        .action-btn.sub { background: var(--error); color: white; }
+        .action-btn.edit { background: var(--warning); color: black; }
+        .action-btn.ban { background: #ff7700; color: white; }
+        .action-btn.unban { background: #00e1ff; color: black; }
+        .action-btn.delete { background: var(--error); color: white; }
+        .action-btn.toggle-on { background: #00ff66; color: black; }
+        .action-btn.toggle-off { background: #575270; color: white; }
+        .action-btn.role-toggle { background: #bc13fe; color: white; }
+
+        .duration-row-item {
+            display: grid; grid-template-columns: 1.5fr 1fr 1fr 40px; gap: 10px; align-items: center; margin-bottom: 10px;
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #toast-container { position: fixed; top: 25px; right: 25px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 14px 20px; border-radius: 12px; color: white; font-weight: 600; font-size: 13px; background: #14121f; border-left: 4px solid var(--neon-cyan); display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .toast.error { border-left-color: var(--error); }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="speed-spinner-box">
+        <div class="spinner-outer"></div>
+        <div class="spinner-inner"></div>
+    </div>
+    <div class="loader-text" id="loader-status-text">CONNECTING ENGINE...</div>
+</div>
+
+<div id="toast-container"></div>
+
+<div class="login-wrapper" id="block-auth-screen">
+    <div class="login-card">
+        <div class="login-icon-circle"><i class="fas fa-envelope"></i></div>
+        <h1>Welcome Back! 👋</h1>
+        <p>Login via Firebase Gmail & Password</p>
+        
+        <div class="auth-group">
+            <label><i class="fas fa-envelope"></i> Gmail Address</label>
+            <div class="auth-input-container">
+                <i class="fas fa-envelope field-icon"></i>
+                <input type="email" class="auth-input focused-red" id="txt-login-email" placeholder="example@gmail.com">
+            </div>
+        </div>
+        
+        <div class="auth-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <div class="auth-input-container">
+                <i class="fas fa-lock field-icon"></i>
+                <input type="password" class="auth-input" id="txt-login-pass" placeholder="Enter Password">
+                <i class="fas fa-eye toggle-eye" id="trigger-eye-btn" onclick="togglePasswordVisibility()"></i>
+            </div>
+        </div>
+        
+        <button class="btn-signin" id="btn-submit-auth">Sign In <i class="fas fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div id="block-workspace" class="hidden">
+    <nav class="navbar">
+        <div class="nav-left">
+            <button class="menu-btn" id="menu-toggle"><i class="fas fa-bars"></i></button>
+            <div class="logo">Abhishek <span>Admin</span></div>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header-box">
+            <div class="sidebar-logo-icon-bg"><i class="fas fa-user-shield"></i></div>
+            <div class="sidebar-header-text">
+                <span class="sidebar-header-title">Abhishek Admin</span>
+                <span class="sidebar-header-subtitle" id="user-display-email">Secure Gateway</span>
+            </div>
+            <button class="sidebar-close" id="sidebar-close"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="sidebar-menu-cat">Navigation Settings</div>
+        <div class="sidebar-menu-list">
+            <div class="sidebar-item active-menu" id="menu-Dashboard" onclick="switchTab('Dashboard')"><i class="fas fa-chart-line"></i> Dashboard Metrics</div>
+            <div class="sidebar-item" id="menu-KeyInjector" onclick="switchTab('KeyInjector')"><i class="fas fa-key"></i> Key Injector Hub</div>
+            <div class="sidebar-item" id="menu-ProductManager" onclick="switchTab('ProductManager')"><i class="fas fa-folder-plus"></i> Setup/Edit Products</div>
+            <div class="sidebar-item" id="menu-Resellers" onclick="switchTab('Resellers')"><i class="fas fa-users-cog"></i> Manage Users & Roles</div>
+            <div class="sidebar-item" id="menu-GatewaySettings" onclick="switchTab('GatewaySettings')"><i class="fas fa-qrcode"></i> FamPay Gateway & UPI</div>
+            
+            <div class="sidebar-item menu-logout-btn" onclick="triggerAdminLogout()"><i class="fas fa-sign-out-alt"></i> Logout Session</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-view-section" id="view-Dashboard">
+            <div class="glass">
+                <h2><i class="fas fa-eye"></i> Realtime System Metrics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header"><span class="stat-label">Total Users / Resellers</span><i class="fas fa-users" style="color:var(--neon-cyan)"></i></div>
+                        <div class="stat-num" id="lbl-total-users">0</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-header"><span class="stat-label">Active Products</span><i class="fas fa-cubes" style="color:var(--neon-purple)"></i></div>
+                        <div class="stat-num" id="lbl-total-prods">0</div>
+                    </div>
+                    <div class="stat-card pink">
+                        <div class="stat-header"><span class="stat-label">Total Generated Keys</span><i class="fas fa-key" style="color:var(--neon-pink)"></i></div>
+                        <div class="stat-num" id="lbl-total-keys">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reseller Upgrade Price Manager -->
+            <div class="glass">
+                <h2><i class="fas fa-cog"></i> Reseller Upgrade Price Configuration</h2>
+                <div class="input-group">
+                    <label>Set Reseller Upgrade Price (₹)</label>
+                    <input type="number" id="admin-reseller-price-input" placeholder="300" step="1"/>
+                </div>
+                <button class="btn btn-cyan" onclick="saveAdminResellerPrice()"><i class="fas fa-save"></i> Save Reseller Price</button>
+            </div>
+        </div>
+
+        <div class="tab-view-section hidden" id="view-KeyInjector">
+            <div class="glass">
+                <h2><i class="fas fa-key"></i> Inject Custom Keys</h2>
+                <div class="input-group">
+                    <label>Select Target Account</label>
+                    <select class="custom-select" id="key-user-assign"><option value="" disabled selected>-- Choose User --</option></select>
+                </div>
+                <div class="input-group"><label>Product Name</label><input type="text" id="key-prod-name" placeholder="e.g. PREMIUM MEMBERSHIP"/></div>
+                <div class="input-group"><label>Duration</label><input type="text" id="key-duration" placeholder="e.g. 1 Day"/></div>
+                <div class="input-group"><label>Custom Key Code</label><input type="text" id="key-custom-code" placeholder="Key string"/></div>
+                <button class="btn btn-pink" id="btn-inject-key"><i class="fas fa-bolt"></i> Inject Key Instantly</button>
+            </div>
+        </div>
+
+        <div class="tab-view-section hidden" id="view-ProductManager">
+            <div class="glass">
+                <h2><i class="fas fa-plus-circle"></i> Create or Add Product</h2>
+                <div class="input-group"><label>Product Title</label><input type="text" id="prod-name" placeholder="e.g. Free Fire Mod"/></div>
+                <div class="input-group"><label>Exact Product PID (API ID)</label><input type="text" id="prod-pid" placeholder="e.g. PRODUCT_PID_ID"/></div>
+                
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; display:block; margin-bottom:8px;">Durations & Pricing (Reseller Price vs User Price)</label>
+                    <div id="duration-rows-container">
+                        <div class="duration-row-item">
+                            <input type="text" class="table-input dur-name" placeholder="Duration (e.g. 1 Day)">
+                            <input type="number" class="table-input dur-reseller-price" placeholder="Reseller Price (₹)" step="0.01">
+                            <input type="number" class="table-input dur-user-price" placeholder="User Price (₹)" step="0.01">
+                            <button type="button" class="action-btn delete" onclick="removeDurationRow(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" class="action-btn add" onclick="addDurationRow()" style="margin-top: 8px; height: 38px; width: 100%; justify-content: center;"><i class="fas fa-plus"></i> Add More Duration (+)</button>
+                </div>
+                
+                <button class="btn btn-cyan" id="btn-add-product" style="margin-top: 15px;"><i class="fas fa-upload"></i> Deploy Live Product</button>
+            </div>
+            <div class="glass">
+                <h2><i class="fas fa-list"></i> Active Product Management Hub</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>Product Name</th><th>Product PID</th><th>Duration & Prices</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="admin-products-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-view-section hidden" id="view-Resellers">
+            <div class="glass">
+                <h2><i class="fas fa-users-cog"></i> Strategic Account & Role Manager</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>Username</th><th>Password</th><th>Role</th><th>Manage Balance (+ / -)</th><th>Actions (Toggle Role / Ban / Delete)</th></tr>
+                        </thead>
+                        <tbody id="admin-credentials-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FamPay Gateway Settings Tab -->
+        <div class="tab-view-section hidden" id="view-GatewaySettings">
+            <div class="glass">
+                <h2><i class="fas fa-qrcode"></i> FamPay Instant Gateway Configuration</h2>
+                <div class="input-group"><label>FamPay API Key</label><input type="text" id="gateway-api-key" placeholder="Enter API Key"></div>
+                <div class="input-group"><label>Merchant UPI ID</label><input type="text" id="gateway-upi-id" placeholder="e.g. merchant@fampay"></div>
+                <button class="btn btn-cyan" id="btn-save-gateway"><i class="fas fa-save"></i> Save FamPay Gateway Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA8IpTQEdUeqPwes0IadTJTzUdQ1-HYFpg",
+        authDomain: "admin-panal-shop.firebaseapp.com",
+        databaseURL: "https://admin-panal-shop-default-rtdb.firebaseio.com",
+        projectId: "admin-panal-shop",
+        storageBucket: "admin-panal-shop.firebasestorage.app",
+        messagingSenderId: "1092189501903",
+        appId: "1:1092189501903:web:c85fbc23c25938d38e7aba",
+        measurementId: "G-1JR31PV22Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const loader = document.getElementById('loader');
+    const statusText = document.getElementById('loader-status-text');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function showSpeedLoader(text = "LOADING...") {
+        statusText.innerText = text;
+        loader.classList.remove('hidden');
+    }
+    function hideSpeedLoader() {
+        loader.classList.add('hidden');
+    }
+
+    window.showToast = (msg, type = 'success') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 3000);
+    };
+
+    window.togglePasswordVisibility = () => {
+        const pField = document.getElementById('txt-login-pass');
+        const eyeIcon = document.getElementById('trigger-eye-btn');
+        if(pField.type === "password") {
+            pField.type = "text";
+            eyeIcon.className = "fas fa-eye-slash toggle-eye";
+        } else {
+            pField.type = "password";
+            eyeIcon.className = "fas fa-eye toggle-eye";
+        }
+    };
+
+    window.addDurationRow = () => {
+        const container = document.getElementById('duration-rows-container');
+        const row = document.createElement('div');
+        row.className = 'duration-row-item';
+        row.innerHTML = `
+            <input type="text" class="table-input dur-name" placeholder="Duration (e.g. 3 Days)">
+            <input type="number" class="table-input dur-reseller-price" placeholder="Reseller Price (₹)" step="0.01">
+            <input type="number" class="table-input dur-user-price" placeholder="User Price (₹)" step="0.01">
+            <button type="button" class="action-btn delete" onclick="removeDurationRow(this)"><i class="fas fa-trash"></i></button>
+        `;
+        container.appendChild(row);
+    };
+
+    window.removeDurationRow = (btn) => {
+        const rows = document.querySelectorAll('.duration-row-item');
+        if(rows.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            showToast("At least one duration row is required!", "error");
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('user-display-email').innerText = user.email;
+            document.getElementById('block-auth-screen').classList.add('hidden');
+            document.getElementById('block-workspace').classList.remove('hidden');
+            initializeDashboardSync();
+        } else {
+            document.getElementById('block-workspace').classList.add('hidden');
+            document.getElementById('block-auth-screen').classList.remove('hidden');
+        }
+        hideSpeedLoader();
+    });
+
+    document.getElementById('btn-submit-auth').onclick = async () => {
+        const email = document.getElementById('txt-login-email').value.trim();
+        const pass = document.getElementById('txt-login-pass').value.trim();
+        if(!email || !pass) return showToast("Please enter Gmail and Password!", "error");
+        
+        showSpeedLoader("VERIFYING CREDENTIALS...");
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            showToast("Firebase Authentication Successful!");
+        } catch(err) {
+            showToast("Incorrect Gmail or Password!", "error");
+            hideSpeedLoader();
+        }
+    };
+
+    window.triggerAdminLogout = async () => {
+        if(confirm("Exit securely and terminate session?")) {
+            showSpeedLoader("TERMINATING SESSION...");
+            try { await signOut(auth); showToast("Session disconnected."); } catch (e) { } finally { hideSpeedLoader(); }
+        }
+    };
+
+    function toggleSidebar() { sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
+    document.getElementById('menu-toggle').onclick = toggleSidebar;
+    document.getElementById('sidebar-close').onclick = toggleSidebar;
+    overlay.onclick = toggleSidebar;
+
+    window.switchTab = (tabName) => {
+        document.querySelectorAll('.tab-view-section').forEach(view => view.classList.add('hidden'));
+        document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active-menu'));
+        document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        document.getElementById(`menu-${tabName}`).classList.add('active-menu');
+        if(sidebar.classList.contains('active')) toggleSidebar();
+    };
+
+    function initializeDashboardSync() {
+        onValue(ref(db, 'system_settings'), (snapshot) => {
+            if(snapshot.exists()) {
+                const settings = snapshot.val();
+                document.getElementById('admin-reseller-price-input').value = settings.resellerUpgradePrice || 300;
+            } else {
+                document.getElementById('admin-reseller-price-input').value = 300;
+            }
+        });
+
+        onValue(ref(db, 'payment_gateway'), (snapshot) => {
+            if(snapshot.exists()) {
+                const gw = snapshot.val();
+                document.getElementById('gateway-api-key').value = gw.apiKey || '';
+                document.getElementById('gateway-upi-id').value = gw.upiId || '';
+            }
+        });
+
+        onValue(ref(db, 'users'), (snapshot) => {
+            const credsTable = document.getElementById('admin-credentials-table');
+            const selectUserDropdown = document.getElementById('key-user-assign');
+            if(!snapshot.exists()) {
+                credsTable.innerHTML = `<tr><td colspan="5" style="text-align:center;">No Accounts Found</td></tr>`;
+                document.getElementById('lbl-total-users').innerText = 0;
+                return;
+            }
+            let totalUsers = 0; let totalKeys = 0;
+            credsTable.innerHTML = '';
+            selectUserDropdown.innerHTML = '<option value="" disabled selected>-- Choose User --</option>';
+
+            snapshot.forEach((child) => {
+                totalUsers++;
+                const uid = child.key; const uData = child.val();
+                let opt = document.createElement('option'); opt.value = uid; opt.innerText = `@${(uData.username || 'unknown').toUpperCase()}`;
+                selectUserDropdown.appendChild(opt);
+                if(uData.generatedKeys) totalKeys += Object.keys(uData.generatedKeys).length;
+                const isBanned = uData.banned === true;
+                const isOff = uData.status === "OFF";
+                const userRole = uData.role || "User";
+                const currentBalance = parseFloat(uData.balance || 0).toFixed(2);
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="ro-text" style="color:#fff; font-weight:700;">@${uData.username || 'N/A'}</span></td>
+                    <td><span class="ro-text">${uData.password || 'N/A'}</span></td>
+                    <td><span class="role-badge" style="background:${userRole === 'Reseller' ? 'rgba(0,255,102,0.2); color:#00ff66;' : 'rgba(0,240,255,0.2); color:#00f0ff;'}">${userRole}</span></td>
+                    <td>
+                        <span class="badge-bal">₹${currentBalance}</span>
+                        <div class="balance-control-box">
+                            <input type="number" id="amt-${uid}" placeholder="Amt" min="0">
+                            <button class="action-btn add" title="Add Balance" onclick="modifyBalance('${uid}', ${uData.balance || 0}, 'add')"><i class="fas fa-plus"></i></button>
+                            <button class="action-btn sub" title="Subtract Balance" onclick="modifyBalance('${uid}', ${uData.balance || 0}, 'sub')"><i class="fas fa-minus"></i></button>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="action-btn role-toggle" onclick="toggleUserRole('${uid}', '${userRole}')">
+                            <i class="fas fa-exchange-alt"></i> Make ${userRole === 'Reseller' ? 'User' : 'Reseller'}
+                        </button>
+                        <button class="action-btn ${isOff ? 'toggle-off' : 'toggle-on'}" onclick="toggleUserStatus('${uid}', '${uData.status || 'ON'}')">
+                            <i class="fas ${isOff ? 'fa-toggle-off' : 'fa-toggle-on'}"></i> ${isOff ? 'OFF' : 'ON'}
+                        </button>
+                        <button class="action-btn ${isBanned ? 'unban' : 'ban'}" onclick="toggleBanUser('${uid}', ${isBanned})">${isBanned ? 'Unban' : 'Ban'}</button>
+                        <button class="action-btn delete" onclick="deleteResellerUser('${uid}', '${uData.username}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                credsTable.appendChild(tr);
+            });
+            document.getElementById('lbl-total-users').innerText = totalUsers;
+            document.getElementById('lbl-total-keys').innerText = totalKeys;
+        });
+
+        onValue(ref(db, 'store_management'), (snapshot) => {
+            const prodTable = document.getElementById('admin-products-table');
+            if(!snapshot.exists()) {
+                prodTable.innerHTML = `<tr><td colspan="5" style="text-align:center;">No Active Products Found</td></tr>`;
+                document.getElementById('lbl-total-prods').innerText = 0;
+                return;
+            }
+            let totalProds = 0; prodTable.innerHTML = '';
+            snapshot.forEach((groupNode) => {
+                totalProds++;
+                const productKey = groupNode.key; 
+                const pData = groupNode.val();
+                
+                let plansHtml = '';
+                if(pData.plans) {
+                    pData.plans.forEach(p => {
+                        plansHtml += `<div style="font-size:11px; color:#00f0ff; margin-bottom:2px;">• ${p.daysPlan} | Reseller: ₹${p.resellerPrice} | User: ₹${p.userPrice}</div>`;
+                    });
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span style="color:#fff; font-weight:750;">${pData.productName || productKey}</span></td>
+                    <td><span class="ro-text">${pData.productPid || 'N/A'}</span></td>
+                    <td>${plansHtml}</td>
+                    <td>
+                        <button class="action-btn delete" onclick="deleteProduct('${productKey}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                `;
+                prodTable.appendChild(tr);
+            });
+            document.getElementById('lbl-total-prods').innerText = totalProds;
+        });
+    }
+
+    // Function to handle both Add (+) and Subtract (-) Balance
+    window.modifyBalance = async (uid, currentBal, action) => {
+        const inputField = document.getElementById(`amt-${uid}`);
+        const amount = parseFloat(inputField.value);
+        if(isNaN(amount) || amount <= 0) return showToast("Enter a valid amount!", "error");
+
+        let newBal = currentBal;
+        if(action === 'add') {
+            newBal += amount;
+        } else if(action === 'sub') {
+            newBal -= amount;
+            if(newBal < 0) newBal = 0; // Prevent negative balance
+        }
+
+        try {
+            await update(ref(db, `users/${uid}`), { balance: newBal });
+            showToast(`Balance updated successfully!`);
+            inputField.value = '';
+        } catch(e) {
+            showToast("Balance update failed", "error");
+        }
+    };
+
+    window.saveAdminResellerPrice = async () => {
+        const priceVal = parseFloat(document.getElementById('admin-reseller-price-input').value);
+        if(isNaN(priceVal) || priceVal <= 0) return showToast("Enter a valid price!", "error");
+
+        showSpeedLoader("SAVING PRICE...");
+        try {
+            await update(ref(db, 'system_settings'), { resellerUpgradePrice: priceVal });
+            showToast("Reseller upgrade price updated successfully!");
+        } catch(e) {
+            showToast("Failed to save price", "error");
+        } finally {
+            hideSpeedLoader();
+        }
+    };
+
+    document.getElementById('btn-save-gateway').onclick = async () => {
+        const apiKey = document.getElementById('gateway-api-key').value.trim();
+        const upiId = document.getElementById('gateway-upi-id').value.trim();
+        if(!apiKey || !upiId) return showToast("API Key and UPI ID are required!", "error");
+
+        showSpeedLoader("SAVING GATEWAY...");
+        try {
+            await set(ref(db, 'payment_gateway'), { apiKey, upiId });
+            showToast("FamPay Gateway Config Saved Successfully!");
+        } catch(e) {
+            showToast("Failed to save gateway settings", "error");
+        } finally {
+            hideSpeedLoader();
+        }
+    };
+
+    document.getElementById('btn-add-product').onclick = async () => {
+        const name = document.getElementById('prod-name').value.trim();
+        const pid = document.getElementById('prod-pid').value.trim();
+
+        if(!name || !pid) return showToast("Enter Product Name and PID", "error");
+
+        const durationRows = document.querySelectorAll('.duration-row-item');
+        let plansArray = [];
+
+        durationRows.forEach(row => {
+            const dName = row.querySelector('.dur-name').value.trim();
+            const rPrice = parseFloat(row.querySelector('.dur-reseller-price').value);
+            const uPrice = parseFloat(row.querySelector('.dur-user-price').value);
+
+            if(dName && !isNaN(rPrice) && !isNaN(uPrice)) {
+                plansArray.push({
+                    daysPlan: dName,
+                    resellerPrice: rPrice,
+                    userPrice: uPrice
+                });
+            }
+        });
+
+        if(plansArray.length === 0) {
+            return showToast("Please fill at least one valid duration with pricing!", "error");
+        }
+
+        const productSlug = name.replace(/[^a-zA-Z0-9]/g, "_");
+
+        showSpeedLoader("DEPLOYING ASSETS...");
+        try {
+            await set(ref(db, `store_management/${productSlug}`), { 
+                productName: name, 
+                productPid: pid, 
+                plans: plansArray 
+            });
+            showToast("Live product configuration deployed!");
+
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-pid').value = '';
+            document.getElementById('duration-rows-container').innerHTML = `
+                <div class="duration-row-item">
+                    <input type="text" class="table-input dur-name" placeholder="Duration (e.g. 1 Day)">
+                    <input type="number" class="table-input dur-reseller-price" placeholder="Reseller Price (₹)" step="0.01">
+                    <input type="number" class="table-input dur-user-price" placeholder="User Price (₹)" step="0.01">
+                    <button type="button" class="action-btn delete" onclick="removeDurationRow(this)"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+        } catch(e) { 
+            showToast("Database deployment error", "error"); 
+        } finally {
+            hideSpeedLoader();
+        }
+    };
+
+    window.toggleUserRole = async (uid, currentRole) => {
+        const newRole = (currentRole === "Reseller") ? "User" : "Reseller";
+        try {
+            await update(ref(db, `users/${uid}`), { role: newRole });
+            showToast(`Role updated to ${newRole}!`);
+        } catch(e) {
+            showToast("Failed to update role", "error");
+        }
+    };
+
+    window.toggleUserStatus = async (uid, currentStatus) => {
+        const nextStatus = currentStatus === "ON" ? "OFF" : "ON";
+        try {
+            await update(ref(db, `users/${uid}`), { status: nextStatus });
+            showToast(`Panel turned ${nextStatus}!`);
+        } catch(e) {
+            showToast("Failed to update status", "error");
+        }
+    };
+
+    window.toggleBanUser = async (uid, statusNow) => {
+        try { await update(ref(db, `users/${uid}`), { banned: !statusNow }); showToast(`Status updated!`); } catch(e) { }
+    };
+
+    window.deleteResellerUser = async (uid, name) => {
+        if(!confirm(`Delete @${name.toUpperCase()} permanently?`)) return;
+        try { await remove(ref(db, `users/${uid}`)); showToast("Account wiped out."); } catch(e) { }
+    };
+
+    window.deleteProduct = async (productKey) => {
+        if(!confirm(`Delete product permanently?`)) return;
+        try { await remove(ref(db, `store_management/${productKey}`)); showToast("Product deleted!"); } catch(e) { }
+    };
+
+    document.getElementById('btn-inject-key').onclick = async () => {
+        const targetUid = document.getElementById('key-user-assign').value;
+        const product = document.getElementById('key-prod-name').value.trim();
+        const duration = document.getElementById('key-duration').value.trim();
+        let customKey = document.getElementById('key-custom-code').value.trim();
+        if(!targetUid || !product || !duration || !customKey) return showToast("Fill all metrics!", "error");
+        try {
+            await set(push(ref(db, `users/${targetUid}/generatedKeys`)), { product, duration, qty: 1, keyCode: customKey, timestamp: new Date().toISOString() });
+            showToast("Custom key injected successfully!");
+            document.getElementById('key-prod-name').value = ''; document.getElementById('key-duration').value = ''; document.getElementById('key-custom-code').value = '';
+        } catch (e) { }
+    };
+</script>
+</body>
+</html>
